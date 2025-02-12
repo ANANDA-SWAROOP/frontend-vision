@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image ChatBot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .message-transition {
+            transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+        }
+        .font-mono {
+            font-family: 'Roboto Mono', monospace;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white font-mono">
+    <div class="container mx-auto max-w-4xl h-screen flex flex-col">
+        <!-- Chat Header -->
+        <div class="bg-slate-800 p-4 rounded-t-lg shadow-lg">
+            <h1 class="text-2xl font-bold text-cyan-400">🖼️ Vision ChatBot</h1>
+            <p class="text-slate-400">Send text/images and get smart responses</p>
+        </div>
+
+        <!-- Chat Messages Container -->
+        <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-800/50 scroll-smooth">
+            <!-- Initial Bot Message -->
+            <div class="bot-message flex justify-start">
+                <div class="max-w-[80%] bg-slate-700 p-4 rounded-lg shadow-md message-transition">
+                    <p>Hello! I'm your vision assistant. You can send me text and images, and I'll help you analyze them!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="bg-slate-800 p-4 rounded-b-lg shadow-lg">
+            <div id="preview-container" class="mb-2"></div>
+            <div class="flex gap-2">
+                <input type="file" id="image-input" accept="image/*" class="hidden" multiple>
+                <button onclick="document.getElementById('image-input').click()" 
+                        class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-colors">
+                    📷 Add Image
+                </button>
+                <div class="flex-1 relative">
+                    <textarea id="user-input" 
+                            class="w-full bg-slate-700 p-3 rounded-lg pr-16 resize-none" 
+                            placeholder="Type your message..." 
+                            rows="1"></textarea>
+                    <button onclick="handleSend()" 
+                            class="absolute right-2 bottom-2 p-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-colors">
+                        🚀 Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="image-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center">
+        <div class="bg-slate-800 p-4 rounded-lg max-w-4xl max-h-[90vh]">
+            <img id="modal-image" class="max-w-full max-h-[80vh] rounded-lg">
+            <button onclick="closeModal()" 
+                    class="absolute top-4 right-4 text-2xl bg-slate-700 rounded-full w-8 h-8 flex items-center justify-center hover:bg-slate-600">
+                ×
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let attachedImages = [];
+
+        // Handle image input changes
+        document.getElementById('image-input').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            attachedImages = [...attachedImages, ...files];
+            updatePreview();
+        });
+
+        // Update image previews
+        function updatePreview() {
+            const container = document.getElementById('preview-container');
+            container.innerHTML = attachedImages.map((file, index) => `
+                <div class="relative inline-block m-1">
+                    <img src="${URL.createObjectURL(file)}" 
+                         class="w-24 h-24 object-cover rounded-lg cursor-pointer"
+                         onclick="showModal('${URL.createObjectURL(file)}')">
+                    <button onclick="removeImage(${index})" 
+                            class="absolute -top-2 -right-2 bg-red-500 rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                        ×
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Handle send button
+        async function handleSend() {
+            const userInput = document.getElementById('user-input').value.trim();
+            const images = attachedImages;
+
+            if (!userInput && images.length === 0) {
+                alert('Please enter a message or attach images');
+                return;
+            }
+
+            // Add user message
+            appendMessage({
+                type: 'user',
+                text: userInput,
+                images: images
+            });
+
+            // Clear inputs
+            document.getElementById('user-input').value = '';
+            attachedImages = [];
+            document.getElementById('preview-container').innerHTML = '';
+
+            // Show loading state
+            const loadingMessage = appendMessage({
+                type: 'bot',
+                loading: true
+            });
+
+            try {
+                // TODO: Replace with actual API call
+                // Simulated API response
+                const response = await simulateApiCall({
+                    text: userInput,
+                    images: images
+                });
+
+                // Remove loading message
+                loadingMessage.remove();
+
+                // Add bot response
+                appendMessage({
+                    type: 'bot',
+                    text: response.text,
+                    image: response.image
+                });
+            } catch (error) {
+                loadingMessage.remove();
+                appendMessage({
+                    type: 'bot',
+                    text: 'Error: Could not get response from the server'
+                });
+            }
+        }
+
+        // Append message to chat
+        function appendMessage({ type, text, images, image, loading }) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            
+            messageDiv.className = `${type}-message flex justify-${type === 'user' ? 'end' : 'start'}`;
+            messageDiv.innerHTML = `
+                <div class="max-w-[80%] bg-${type === 'user' ? 'cyan-700' : 'slate-700'} p-4 rounded-lg shadow-md message-transition opacity-0 transform translate-y-2">
+                    ${loading ? `
+                        <div class="flex items-center gap-2">
+                            <div class="animate-spin">🌀</div>
+                            Analyzing...
+                        </div>
+                    ` : ''}
+                    ${text ? `<p class="${loading ? 'hidden' : ''}">${text}</p>` : ''}
+                    ${images ? images.map(img => `
+                        <img src="${URL.createObjectURL(img)}" 
+                             class="w-24 h-24 object-cover rounded-lg mt-2 cursor-pointer"
+                             onclick="showModal('${URL.createObjectURL(img)}')">
+                    `).join('') : ''}
+                    ${image ? `
+                        <div class="mt-4 border-t border-slate-500 pt-2">
+                            <img src="${image}" class="max-w-full rounded-lg">
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messageDiv.scrollIntoView({ behavior: 'smooth' });
+            
+            // Trigger animation
+            setTimeout(() => {
+                messageDiv.querySelector('.message-transition').classList.remove('opacity-0', 'translate-y-2');
+            }, 50);
+
+            return messageDiv;
+        }
+
+        // Simulated API call (Replace with actual fetch)
+        async function simulateApiCall(data) {
+            // Example of real implementation:
+            // const formData = new FormData();
+            // formData.append('prompt', data.text);
+            // data.images.forEach((img, i) => formData.append(`image_${i}`, img));
+            // const response = await fetch('/api/endpoint', { method: 'POST', body: formData });
+            // return await response.json();
+
+            return new Promise(resolve => setTimeout(() => {
+                resolve({
+                    text: "This is a simulated response. In real implementation, this would come from your Python backend.",
+                    image: "https://picsum.photos/200/300" // Random example image
+                });
+            }, 2000));
+        }
+
+        // Image modal functions
+        function showModal(src) {
+            document.getElementById('image-modal').classList.remove('hidden');
+            document.getElementById('modal-image').src = src;
+        }
+
+        function closeModal() {
+            document.getElementById('image-modal').classList.add('hidden');
+        }
+
+        function removeImage(index) {
+            attachedImages.splice(index, 1);
+            updatePreview();
+        }
+
+        // Handle Enter key
+        document.getElementById('user-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+            }
+        });
+
+        // Auto-resize textarea
+        document.getElementById('user-input').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    </script>
+</body>
+</html>
