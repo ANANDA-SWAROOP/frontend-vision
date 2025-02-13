@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image ChatBot with Voice, Gallery & Download</title>
+  <title>Databyte image chatapp</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <style>
@@ -29,7 +29,7 @@
     <div id="sidebar" class="w-64 bg-slate-800 p-4 overflow-y-auto hidden-sidebar">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold">Gallery</h2>
-        <button onclick="toggleSidebar()" class="text-2xl hover:text-cyan-400">×</button>
+        <button onclick="toggleSidebar()" class="text-2xl hover:text-cyan-400">close ×</button>
       </div>
       <div id="sidebar-images" class="space-y-4">
         <!-- Gallery images will be appended here -->
@@ -41,7 +41,7 @@
       <!-- Chat Header -->
       <div class="bg-slate-800 p-4 rounded-t-lg shadow-lg flex items-center">
         <div>
-          <h1 class="text-2xl font-bold text-cyan-400">🖼️ Vision ChatBot</h1>
+          <h1 class="text-2xl font-bold text-cyan-400">Databyte image chatapp</h1>
           <p class="text-slate-400">Send text/images and get smart responses</p>
         </div>
         <button onclick="toggleSidebar()" class="ml-auto px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded transition-colors">
@@ -65,12 +65,12 @@
         <div class="flex gap-2">
           <input type="file" id="image-input" accept="image/*" class="hidden" multiple />
           <button onclick="document.getElementById('image-input').click()"
-                  class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-colors">
+                  class="px-4 py-2 bg-cyan-600 border border-blue-500 hover:bg-cyan-700 rounded-lg transition-colors">
             📷 Add Image
           </button>
           <!-- Voice input button -->
           <button onclick="startVoiceInput()"
-                  class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors">
+                  class="px-4 py-2 bg-green-600 border border-green-300 hover:bg-green-700 rounded-lg transition-colors">
             🎤 Speak
           </button>
           <div class="flex-1 relative">
@@ -79,7 +79,7 @@
                       placeholder="Type your message..."
                       rows="1"></textarea>
             <button onclick="handleSend()"
-                    class="absolute right-2 bottom-2 p-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-colors my-1">
+                    class="absolute right-1 border border-blue-500 text-xm bottom-2 p-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-colors my-[7px]">
               🚀 Send
             </button>
           </div>
@@ -112,7 +112,7 @@
       updatePreview();
     });
 
-    // Update image previews in the input area
+ 
     function updatePreview() {
       const container = document.getElementById('preview-container');
       container.innerHTML = attachedImages.map((file, index) => {
@@ -132,7 +132,7 @@
       }).join('');
     }
 
-    // Handle send button
+   
     async function handleSend() {
       const userInput = document.getElementById('user-input').value.trim();
       const images = attachedImages;
@@ -142,19 +142,18 @@
         return;
       }
 
-      // Add user message
       appendMessage({
         type: 'user',
         text: userInput,
         images: images
       });
 
-      // Clear inputs
+      
       document.getElementById('user-input').value = '';
       attachedImages = [];
       document.getElementById('preview-container').innerHTML = '';
 
-      // Show loading state
+     
       const loadingMessage = appendMessage({
         type: 'bot',
         loading: true
@@ -224,10 +223,10 @@
         `;
       }
 
-      // Build speaker button for bot messages with text (and not loading)
+      
       let speakerButton = '';
       if (type === 'bot' && text && !loading) {
-        // Use a data attribute to hold the text to speak
+        
         speakerButton = `<button onclick="speakText(\`${text.replace(/`/g, '\\`')}\`)"
                               class="ml-2 inline-block px-2 py-1 bg-slate-600 hover:bg-slate-500 rounded">
                             🔊
@@ -252,7 +251,7 @@
       messagesContainer.appendChild(messageDiv);
       messageDiv.scrollIntoView({ behavior: 'smooth' });
 
-      // Trigger animation
+     
       setTimeout(() => {
         messageDiv.querySelector('.message-transition').classList.remove('opacity-0', 'translate-y-2');
       }, 50);
