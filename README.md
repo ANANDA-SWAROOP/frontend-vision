@@ -41,8 +41,8 @@ A conversational image chatbot built with **HTML**, **Tailwind CSS**, and **Java
 ### Steps to Run
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/vision-chatbot.git
-   cd vision-chatbot
+   git clone https://github.com/ANANDA-SWAROOP/frontend-vision.git
+   cd frontend-vision
    ```
 
 2. Open the `index.html` file in your browser:
@@ -64,7 +64,6 @@ vision-chatbot/
 │
 ├── index.html          # Main HTML file with Tailwind CSS and JS
 ├── README.md           # This file
-└── screenshot.png      # Screenshot of the project (optional)
 ```
 
 ---
@@ -92,13 +91,5 @@ To connect the frontend to your Python backend:
 2. Ensure your backend:
    - Accepts `multipart/form-data` for text and image uploads.
    - Returns a JSON response with `text` and an optional `image` URL.
-
----
-
-## Customization 🎨
-
-- **Tailwind CSS**: Modify the `tailwind.config.js` file (if added) to customize colors, fonts, and styles.
-- **JavaScript**: Add more features like voice input, markdown support, or additional UI elements.
-- **Backend**: Extend the backend to support more advanced AI models or image processing.
 
 ---
